@@ -13,6 +13,7 @@ pub(crate) type SerResult = Result<(), UnevalError>;
 pub struct Uneval<W: Write> {
     writer: W,
     inside: bool,
+    prev_inside: bool,
 }
 
 impl<W: Write> Uneval<W> {
@@ -20,10 +21,12 @@ impl<W: Write> Uneval<W> {
         Self {
             writer: target,
             inside: false,
+            prev_inside: false,
         }
     }
 
     fn start_sub(&mut self) -> &mut Self {
+        self.prev_inside = self.inside;
         self.inside = false;
         self
     }
@@ -267,6 +270,7 @@ impl<W: Write> ser::SerializeSeq for &mut Uneval<W> {
 
     fn end(self) -> SerResult {
         write!(self.writer, "].into_iter().collect()")?;
+        self.inside = self.prev_inside;
         Ok(())
     }
 }
@@ -283,6 +287,7 @@ impl<W: Write> ser::SerializeTuple for &mut Uneval<W> {
 
     fn end(self) -> SerResult {
         write!(self.writer, ")) }}")?;
+        self.inside = self.prev_inside;
         Ok(())
     }
 }
@@ -299,6 +304,7 @@ impl<W: Write> ser::SerializeTupleStruct for &mut Uneval<W> {
 
     fn end(self) -> SerResult {
         write!(self.writer, ")")?;
+        self.inside = self.prev_inside;
         Ok(())
     }
 }
@@ -315,6 +321,7 @@ impl<W: Write> ser::SerializeTupleVariant for &mut Uneval<W> {
 
     fn end(self) -> SerResult {
         write!(self.writer, ")")?;
+        self.inside = self.prev_inside;
         Ok(())
     }
 }
@@ -344,6 +351,7 @@ impl<W: Write> ser::SerializeMap for &mut Uneval<W> {
 
     fn end(self) -> SerResult {
         write!(self.writer, "].into_iter().collect()")?;
+        self.inside = self.prev_inside;
         Ok(())
     }
 }
@@ -368,6 +376,7 @@ impl<W: Write> ser::SerializeStruct for &mut Uneval<W> {
     fn end(self) -> SerResult {
         self.comma()?;
         write!(self.writer, "}}")?;
+        self.inside = self.prev_inside;
         Ok(())
     }
 }
@@ -391,6 +400,7 @@ impl<W: Write> ser::SerializeStructVariant for &mut Uneval<W> {
 
     fn end(self) -> SerResult {
         write!(self.writer, "}}")?;
+        self.inside = self.prev_inside;
         Ok(())
     }
 }
