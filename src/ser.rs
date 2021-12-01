@@ -366,6 +366,7 @@ impl<W: Write> ser::SerializeStruct for &mut Uneval<W> {
     }
 
     fn end(self) -> SerResult {
+        self.comma()?;
         write!(self.writer, "}}")?;
         Ok(())
     }
