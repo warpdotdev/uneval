@@ -126,7 +126,7 @@ impl<W: Write> ser::Serializer for &mut Uneval<W> {
     }
 
     fn serialize_str(self, v: &str) -> SerResult {
-        write!(self.writer, "r##\"{}\"##.into()", v)?;
+        write!(self.writer, "r####\"{}\"####.into()", v)?;
         Ok(())
     }
 
